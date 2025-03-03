@@ -71,7 +71,7 @@ export default function TopicDetail({ topic }: TopicDetailProps) {
       {/* Main content with action bar */}
       <div className="flex">
         {/* Main content */}
-        <article className="flex-1 md:pr-16">
+        <article className="flex-1 md:pr-4">
           <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
               {topic.title}
@@ -220,7 +220,7 @@ export default function TopicDetail({ topic }: TopicDetailProps) {
         </article>
 
         {/* Desktop/Tablet: Action buttons - positioned in the right margin */}
-        <div className="hidden md:block w-16 ml-4">
+        <div className="hidden md:block w-14 ml-2">
           <div className="sticky top-24">
             <div className="flex flex-col items-center space-y-4 bg-white p-3 rounded-lg shadow-sm border">
               <ActionButton
