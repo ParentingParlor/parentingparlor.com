@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -12,6 +12,11 @@ import {
   CheckCircle,
   Plus,
   X,
+  Facebook,
+  Instagram,
+  Twitter,
+  Copy,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Topic } from "@/types";
@@ -24,6 +29,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface TopicDetailProps {
   topic: Topic;
@@ -42,6 +58,12 @@ function formatVerifiedDate(dateString?: string): string {
 export default function TopicDetail({ topic }: TopicDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isMobileFabOpen, setIsMobileFabOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isFlagModalOpen, setIsFlagModalOpen] = useState(false);
+  const [flagReason, setFlagReason] = useState("inappropriate");
+  const [isCopied, setIsCopied] = useState(false);
+
+  const commentFormRef = useRef(null);
 
   // Get highlighted comments (top 2 comments)
   const highlightedComments =
@@ -52,12 +74,64 @@ export default function TopicDetail({ topic }: TopicDetailProps) {
     setIsMobileFabOpen(!isMobileFabOpen);
   };
 
+  // Scroll to comment form
+  const scrollToComments = () => {
+    if (commentFormRef.current) {
+      commentFormRef.current.scrollIntoView({ behavior: "smooth" });
+
+      // If on mobile, close the FAB menu after clicking
+      if (isMobileFabOpen) {
+        setIsMobileFabOpen(false);
+      }
+    }
+  };
+
+  // Handle share actions
+  const handleShare = () => {
+    setIsShareModalOpen(true);
+
+    // If on mobile, close the FAB menu after clicking
+    if (isMobileFabOpen) {
+      setIsMobileFabOpen(false);
+    }
+  };
+
+  // Handle flag actions
+  const handleFlag = () => {
+    setIsFlagModalOpen(true);
+
+    // If on mobile, close the FAB menu after clicking
+    if (isMobileFabOpen) {
+      setIsMobileFabOpen(false);
+    }
+  };
+
+  // Handle copy link
+  const copyToClipboard = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    });
+  };
+
+  // Handle flag submission
+  const submitFlag = () => {
+    console.log("Flagged for:", flagReason);
+    setIsFlagModalOpen(false);
+  };
+
   // Action button component for reuse
-  const ActionButton = ({ icon, isActive = false, label }) => (
+  const ActionButton = ({ icon, isActive = false, label, onClick }) => (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button className="p-2 rounded-full hover:bg-gray-100">{icon}</button>
+          <button
+            className="p-2 rounded-full hover:bg-gray-100"
+            onClick={onClick}
+          >
+            {icon}
+          </button>
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-sm">{label}</p>
@@ -193,7 +267,7 @@ export default function TopicDetail({ topic }: TopicDetailProps) {
               Discussion ({topic.communityResponses})
             </h2>
 
-            <div className="mb-6">
+            <div className="mb-6" ref={commentFormRef}>
               <CommentForm
                 onSubmit={(content, attachedLists) => {
                   // Handle comment submission
@@ -235,6 +309,7 @@ export default function TopicDetail({ topic }: TopicDetailProps) {
                 }
                 isActive={topic.likes > 0}
                 label="Like"
+                onClick={() => console.log("Liked")}
               />
               <span className="text-sm font-medium text-gray-700">
                 {topic.likes}
@@ -242,18 +317,22 @@ export default function TopicDetail({ topic }: TopicDetailProps) {
               <ActionButton
                 icon={<MessageCircle className="h-6 w-6 text-gray-500" />}
                 label="Comment"
+                onClick={scrollToComments}
               />
               <ActionButton
                 icon={<Bookmark className="h-6 w-6 text-gray-500" />}
                 label="Bookmark"
+                onClick={() => console.log("Bookmarked")}
               />
               <ActionButton
                 icon={<Share2 className="h-6 w-6 text-gray-500" />}
                 label="Share"
+                onClick={handleShare}
               />
               <ActionButton
                 icon={<Flag className="h-6 w-6 text-gray-500" />}
                 label="Report"
+                onClick={handleFlag}
               />
             </div>
           </div>
@@ -277,6 +356,7 @@ export default function TopicDetail({ topic }: TopicDetailProps) {
               }
               isActive={topic.likes > 0}
               label="Like"
+              onClick={() => console.log("Liked")}
             />
             <span className="text-sm font-medium text-gray-700">
               {topic.likes}
@@ -284,18 +364,22 @@ export default function TopicDetail({ topic }: TopicDetailProps) {
             <ActionButton
               icon={<MessageCircle className="h-6 w-6 text-gray-500" />}
               label="Comment"
+              onClick={scrollToComments}
             />
             <ActionButton
               icon={<Bookmark className="h-6 w-6 text-gray-500" />}
               label="Bookmark"
+              onClick={() => console.log("Bookmarked")}
             />
             <ActionButton
               icon={<Share2 className="h-6 w-6 text-gray-500" />}
               label="Share"
+              onClick={handleShare}
             />
             <ActionButton
               icon={<Flag className="h-6 w-6 text-gray-500" />}
               label="Report"
+              onClick={handleFlag}
             />
           </div>
         )}
@@ -315,6 +399,164 @@ export default function TopicDetail({ topic }: TopicDetailProps) {
           )}
         </button>
       </div>
+
+      {/* Share Modal */}
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share this post</DialogTitle>
+            <DialogDescription>
+              Share this post with your friends and family
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center space-x-2 mb-4">
+            <div className="grid flex-1 gap-2">
+              <Label htmlFor="link" className="sr-only">
+                Link
+              </Label>
+              <Input
+                id="link"
+                defaultValue={
+                  typeof window !== "undefined" ? window.location.href : ""
+                }
+                readOnly
+                className="h-9"
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="px-3"
+              onClick={copyToClipboard}
+            >
+              <span className="sr-only">Copy</span>
+              {isCopied ? "Copied!" : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
+          <div className="flex justify-center gap-4 py-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full bg-blue-500 text-white hover:bg-blue-600"
+            >
+              <Facebook className="h-5 w-5" />
+              <span className="sr-only">Share on Facebook</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full bg-pink-500 text-white hover:bg-pink-600"
+            >
+              <Instagram className="h-5 w-5" />
+              <span className="sr-only">Share on Instagram</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full bg-blue-400 text-white hover:bg-blue-500"
+            >
+              <Twitter className="h-5 w-5" />
+              <span className="sr-only">Share on Twitter</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full bg-black text-white hover:bg-gray-800"
+            >
+              <svg
+                className="h-5 w-5"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+              </svg>
+              <span className="sr-only">Share on TikTok</span>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Flag Modal */}
+      <Dialog open={isFlagModalOpen} onOpenChange={setIsFlagModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Report this post</DialogTitle>
+            <DialogDescription>
+              Please select a reason for reporting this content
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <RadioGroup value={flagReason} onValueChange={setFlagReason}>
+              <div className="flex items-start space-x-2 mb-3">
+                <RadioGroupItem value="inappropriate" id="inappropriate" />
+                <Label
+                  htmlFor="inappropriate"
+                  className="font-normal leading-relaxed cursor-pointer"
+                >
+                  <span className="font-medium">Inappropriate content</span>
+                  <p className="text-sm text-gray-500">
+                    This content contains language or imagery that violates
+                    community guidelines
+                  </p>
+                </Label>
+              </div>
+              <div className="flex items-start space-x-2 mb-3">
+                <RadioGroupItem value="misinformation" id="misinformation" />
+                <Label
+                  htmlFor="misinformation"
+                  className="font-normal leading-relaxed cursor-pointer"
+                >
+                  <span className="font-medium">Misinformation</span>
+                  <p className="text-sm text-gray-500">
+                    This content contains false or misleading information
+                  </p>
+                </Label>
+              </div>
+              <div className="flex items-start space-x-2 mb-3">
+                <RadioGroupItem value="spam" id="spam" />
+                <Label
+                  htmlFor="spam"
+                  className="font-normal leading-relaxed cursor-pointer"
+                >
+                  <span className="font-medium">Spam</span>
+                  <p className="text-sm text-gray-500">
+                    This content is spam or misleading
+                  </p>
+                </Label>
+              </div>
+              <div className="flex items-start space-x-2">
+                <RadioGroupItem value="other" id="other" />
+                <Label
+                  htmlFor="other"
+                  className="font-normal leading-relaxed cursor-pointer"
+                >
+                  <span className="font-medium">Other</span>
+                  <p className="text-sm text-gray-500">
+                    This content violates community guidelines in other ways
+                  </p>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <DialogFooter className="sm:justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsFlagModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={submitFlag}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Submit Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
