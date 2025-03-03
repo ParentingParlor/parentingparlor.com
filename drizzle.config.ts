@@ -1,10 +1,16 @@
-import type { Config } from 'drizzle-kit';
- 
-export default {
+import { defineConfig } from 'drizzle-kit';
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is required');
+}
+
+export default defineConfig({
   schema: './src/db/schema.ts',
-  out: './drizzle',
+  out: "./src/db/migrations",
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL || 'file:./sqlite.db',
+    url: process.env.DATABASE_URL,
   },
-} satisfies Config;
+  verbose: true,
+  strict: true,
+});

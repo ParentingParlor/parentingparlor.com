@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MessageCircle, ThumbsUp, Share2, Bookmark, Flag, CheckCircle } from 'lucide-react';
+import { MessageCircle, ThumbsUp, Share2, Bookmark, Flag, CheckCircle, Plus, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Topic } from '@/types';
 import CommentForm from './comments/CommentForm';
@@ -32,15 +32,34 @@ function formatVerifiedDate(dateString?: string): string {
 
 export default function TopicDetail({ topic }: TopicDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isMobileFabOpen, setIsMobileFabOpen] = useState(false);
 
   // Get highlighted comments (top 2 comments)
   const highlightedComments = topic.comments?.filter(c => c.highlighted)?.slice(0, 2) || [];
+
+  // Toggle FAB menu for mobile
+  const toggleFabMenu = () => {
+    setIsMobileFabOpen(!isMobileFabOpen);
+  };
+
+  const ActionButton = ({ icon, isActive = false, label }) => (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button className="p-2 rounded-full hover:bg-gray-100">
+          {icon}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p className="text-sm">{label}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
 
   return (
     <div className="max-w-8xl mx-auto relative">
       <div className="flex">
         {/* Main content */}
-        <article className="flex-1 pr-16">
+        <article className="flex-1 pr-0 md:pr-16">
           <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{topic.title}</h1>
 
@@ -168,27 +187,79 @@ export default function TopicDetail({ topic }: TopicDetailProps) {
           </div>
         </article>
 
-        {/* Action buttons - positioned in the right margin */}
-        <div className="sticky top-24 h-fit ml-4">
-          <div className="flex flex-col items-center space-y-4 bg-white p-3 rounded-lg shadow-sm border">
-            <button className="p-2 rounded-full hover:bg-gray-100">
-              <ThumbsUp className={`h-6 w-6 ${topic.likes > 0 ? 'text-purple-600 fill-current' : 'text-gray-500'}`} />
-            </button>
-            <span className="text-sm font-medium text-gray-700">{topic.likes}</span>
-            <button className="p-2 rounded-full hover:bg-gray-100">
-              <MessageCircle className="h-6 w-6 text-gray-500" />
-            </button>
-            <button className="p-2 rounded-full hover:bg-gray-100">
-              <Bookmark className="h-6 w-6 text-gray-500" />
-            </button>
-            <button className="p-2 rounded-full hover:bg-gray-100">
-              <Share2 className="h-6 w-6 text-gray-500" />
-            </button>
-            <button className="p-2 rounded-full hover:bg-gray-100">
-              <Flag className="h-6 w-6 text-gray-500" />
-            </button>
-          </div>
+        {/* Desktop/Tablet: Action buttons - positioned in the right margin - ONLY visible on md and above */}
+        <div className="hidden md:block sticky top-24 h-fit ml-4">
+          <TooltipProvider>
+            <div className="flex flex-col items-center space-y-4 bg-white p-3 rounded-lg shadow-sm border">
+              <ActionButton 
+                icon={<ThumbsUp className={`h-6 w-6 ${topic.likes > 0 ? 'text-purple-600 fill-current' : 'text-gray-500'}`} />}
+                isActive={topic.likes > 0}
+                label="Like"
+              />
+              <span className="text-sm font-medium text-gray-700">{topic.likes}</span>
+              <ActionButton 
+                icon={<MessageCircle className="h-6 w-6 text-gray-500" />}
+                label="Comment"
+              />
+              <ActionButton 
+                icon={<Bookmark className="h-6 w-6 text-gray-500" />}
+                label="Bookmark"
+              />
+              <ActionButton 
+                icon={<Share2 className="h-6 w-6 text-gray-500" />}
+                label="Share"
+              />
+              <ActionButton 
+                icon={<Flag className="h-6 w-6 text-gray-500" />}
+                label="Report"
+              />
+            </div>
+          </TooltipProvider>
         </div>
+      </div>
+
+      {/* Mobile: Floating Action Button - ONLY visible on smaller than md screens */}
+      <div className="md:hidden fixed right-6 bottom-6 z-50">
+        {/* FAB Menu - shown when open */}
+        {isMobileFabOpen && (
+          <div className="absolute bottom-16 right-0 bg-white rounded-lg shadow-lg p-3 mb-2 flex flex-col items-center space-y-4 border">
+            <ActionButton 
+              icon={<ThumbsUp className={`h-6 w-6 ${topic.likes > 0 ? 'text-purple-600 fill-current' : 'text-gray-500'}`} />}
+              isActive={topic.likes > 0}
+              label="Like"
+            />
+            <span className="text-sm font-medium text-gray-700">{topic.likes}</span>
+            <ActionButton 
+              icon={<MessageCircle className="h-6 w-6 text-gray-500" />}
+              label="Comment"
+            />
+            <ActionButton 
+              icon={<Bookmark className="h-6 w-6 text-gray-500" />}
+              label="Bookmark"
+            />
+            <ActionButton 
+              icon={<Share2 className="h-6 w-6 text-gray-500" />}
+              label="Share"
+            />
+            <ActionButton 
+              icon={<Flag className="h-6 w-6 text-gray-500" />}
+              label="Report"
+            />
+          </div>
+        )}
+        
+        {/* Main FAB button */}
+        <button
+          onClick={toggleFabMenu}
+          className="bg-purple-600 text-white p-4 rounded-full shadow-lg hover:bg-purple-700 transition-colors"
+          aria-label={isMobileFabOpen ? "Close actions menu" : "Open actions menu"}
+        >
+          {isMobileFabOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Plus className="h-6 w-6" />
+          )}
+        </button>
       </div>
     </div>
   );
