@@ -36,6 +36,14 @@ const userPostPointsBase = {
   ...pointsFields
 }
 
+export const badges = pgTable('badges', {
+  ...base,
+  name: text().notNull().unique(),
+  description: text().notNull(),
+  icon: text().notNull(),
+  color: text().notNull(),
+});
+
 export const comments = pgTable(
   "comments",
   {
@@ -154,22 +162,29 @@ export const listItemsRelations = relations(listItems, (helpers) => {
   return relations
 });
 
+export const pointRewards = pgTable('pointRewards', {
+  ...userBase,
+  amount: integer().notNull(),
+  description: text().notNull(),
+});
+export const pointRewardsRelations = relations(pointRewards, (helpers) => {
+  const userRelation = helpers.one(users, {
+    fields: [pointRewards.userId],
+    references: [users.id],
+  })
+  const relations = { user: userRelation }
+  return relations
+});
+
 export const posts = pgTable('posts', {
   ...userBase,
   content: text().notNull(),
   slug: text('slug').notNull().unique(),
-  topicId: integer()
-    .references(() => topics.id, { onDelete: 'cascade' })
-    .notNull(),
   title: text().notNull(),
 })
 export const postsRelations = relations(posts, (helpers) => {
   const commentsRelation = helpers.many(comments)
   const postListsRelations = helpers.many(postLists)
-  const topicRelation = helpers.one(topics, {
-    fields: [posts.topicId],
-    references: [topics.id],
-  })
   const userRelation = helpers.one(users, {
     fields: [posts.userId],
     references: [users.id],
@@ -178,7 +193,6 @@ export const postsRelations = relations(posts, (helpers) => {
   const relations = {
     comments: commentsRelation,
     postLists: postListsRelations,
-    topic: topicRelation,
     user: userRelation,
     userViews: userViewsRelation,
   }
@@ -203,14 +217,6 @@ export const postLikesRelations = relations(postLikes, (helpers) => {
   }
   return relations
 });
-export const users = pgTable('users', {
-  ...base,
-  email: text().notNull().unique(),
-  displayName: text().notNull(),
-  verified: boolean().notNull().default(false),
-  totalPoints: integer('total_points').notNull().default(0),
-  monthlyPoints: integer('monthly_points').notNull().default(0),
-});
 
 export const postLists = pgTable(
   'postLists',
@@ -223,20 +229,61 @@ export const postLists = pgTable(
       .references(() => posts.id),
   },
   (t) => [
-		primaryKey({ columns: [t.listId, t.postId] })
-	],
+    primaryKey({ columns: [t.listId, t.postId] })
+  ],
 );
-export const postListsRelations = relations(postLists, ({ one }) => ({
-  list: one(lists, {
+export const postListsRelations = relations(postLists, (helpers) => {
+  const list = helpers.one(lists, {
     fields: [postLists.listId],
     references: [lists.id],
-  }),
-  post: one(posts, {
+  })
+  const post = helpers.one(posts, {
     fields: [postLists.postId],
     references: [posts.id],
-  }),
-}));
+  })
+  return { list, post }
+});
 
+export const postTags = pgTable(
+  'postTags',
+  {
+    postId: integer()
+      .notNull()
+      .references(() => posts.id),
+    tagId: integer()
+      .notNull()
+      .references(() => tags.id),
+  },
+  (table) => [
+    primaryKey({ columns: [table.postId, table.tagId] })
+  ],
+);
+export const postTagsRelations = relations(postTags, (helpers) => {
+  return {
+    post: helpers.one(posts, {
+      fields: [postTags.postId],
+      references: [posts.id],
+    }),
+    tag: helpers.one(tags, {
+      fields: [postTags.tagId],
+      references: [tags.id],
+    }),
+  }
+});
+
+export const tags = pgTable('tagsRewards', {
+  ...base,
+  name: text().notNull().unique(),
+})
+
+export const users = pgTable('users', {
+  ...base,
+  email: text().notNull().unique(),
+  displayName: text().notNull(),
+  verified: boolean().notNull().default(false),
+  totalPoints: integer('total_points').notNull().default(0),
+  monthlyPoints: integer('monthly_points').notNull().default(0),
+});
 export const usersRelations = relations(users, (helpers) => {
   const commentsRelation = helpers.many(comments)
   const commentLikesRelation = helpers.many(commentLikes)
@@ -269,6 +316,28 @@ export const usersRelations = relations(users, (helpers) => {
     userViews: userViewsRelation,
   }
   return relations;
+});
+
+export const userBadges = pgTable('userBadges', {
+  ...userBase,
+  badgeId: integer()
+    .references(() => badges.id, { onDelete: 'cascade' })
+    .notNull(),
+})
+export const userBadgesRelations = relations(userBadges, (helpers) => {
+  const badgeRelation = helpers.one(badges, {
+    fields: [userBadges.badgeId],
+    references: [badges.id],
+  })
+  const userRelation = helpers.one(users, {
+    fields: [userBadges.userId],
+    references: [users.id],
+  })
+  const relations = {
+    badge: badgeRelation,
+    user: userRelation,
+  }
+  return relations
 });
 
 export const userComments = pgTable('userComments', {
@@ -408,159 +477,3 @@ export const userViewsRelations = relations(userViews, (helpers) => {
   }
   return relations
 });
-
-export const pointRewards = pgTable('pointRewards', {
-  ...userBase,
-  amount: integer().notNull(),
-  description: text().notNull(),
-});
-export const pointRewardsRelations = relations(pointRewards, (helpers) => {
-  const userRelation = helpers.one(users, {
-    fields: [pointRewards.userId],
-    references: [users.id],
-  })
-  const relations = { user: userRelation }
-  return relations
-});
-
-export const topics = pgTable('topics', {
-  ...base,
-  label: text().notNull(),
-  slug: text().notNull().unique(),
-});
-export const topicsRelations = relations(topics, (helpers) => {
-  const postsRelation = helpers.many(posts)
-  const relations = { posts: postsRelation }
-  return relations
-});
-
-// // Track where lists are published
-// export const listPublications = sqliteTable('list_publications', {
-//   id: text('id').primaryKey(),
-//   listId: text('list_id').references(() => lists.id),
-//   topicId: text('topic_id').references(() => topics.id),
-//   commentId: text('comment_id').references(() => comments.id),
-//   createdAt: text('created_at').notNull(),
-// });
-
-// export const tags = sqliteTable('tags', {
-//   id: text('id').primaryKey(),
-//   name: text('name').notNull().unique(),
-//   category: text('category').notNull(),
-//   color: text('color').notNull(),
-// });
-
-// export const topicTags = sqliteTable('topic_tags', {
-//   topicId: text('topic_id').references(() => topics.id),
-//   tagId: text('tag_id').references(() => tags.id),
-// });
-
-// export const badges = sqliteTable('badges', {
-//   id: text('id').primaryKey(),
-//   name: text('name').notNull().unique(),
-//   description: text('description').notNull(),
-//   icon: text('icon').notNull(),
-//   color: text('color').notNull(),
-// });
-
-// export const userBadges = sqliteTable('user_badges', {
-//   userId: text('user_id').references(() => users.id),
-//   badgeId: text('badge_id').references(() => badges.id),
-//   awardedAt: text('awarded_at').notNull(),
-// });
-
-// // Partner companies and products schema
-// export const partners = sqliteTable('partners', {
-//   id: text('id').primaryKey(),
-//   name: text('name').notNull(),
-//   slug: text('slug').notNull().unique(),
-//   logo: text('logo').notNull(),
-//   description: text('description').notNull(),
-//   website: text('website').notNull(),
-//   contactEmail: text('contact_email').notNull(),
-//   contactPhone: text('contact_phone'),
-//   isVerified: integer('is_verified', { mode: 'boolean' }).notNull().default(false),
-//   joinedDate: text('joined_date').notNull(),
-//   categories: text('categories').notNull(), // JSON array
-//   status: text('status').notNull().default('active'), // active, suspended, pending
-// });
-
-// export const products = sqliteTable('products', {
-//   id: text('id').primaryKey(),
-//   partnerId: text('partner_id').references(() => partners.id).notNull(),
-//   name: text('name').notNull(),
-//   slug: text('slug').notNull().unique(),
-//   description: text('description').notNull(),
-//   shortDescription: text('short_description').notNull(),
-//   price: integer('price').notNull(),
-//   salePrice: integer('sale_price'),
-//   currency: text('currency').notNull().default('USD'),
-//   images: text('images').notNull(), // JSON array
-//   categories: text('categories').notNull(), // JSON array
-//   tags: text('tags').notNull(), // JSON array
-//   ageRange: text('age_range'),
-//   features: text('features').notNull(), // JSON array
-//   specs: text('specs'), // JSON object
-//   inventory: integer('inventory'),
-//   releaseDate: text('release_date').notNull(),
-//   lastUpdated: text('last_updated').notNull(),
-//   ratingAvg: integer('rating_avg').notNull().default(0),
-//   ratingCount: integer('rating_count').notNull().default(0),
-//   status: text('status').notNull().default('active'), // active, discontinued, coming_soon
-// });
-
-// export const productReviews = sqliteTable('product_reviews', {
-//   id: text('id').primaryKey(),
-//   productId: text('product_id').references(() => products.id).notNull(),
-//   userId: text('user_id').references(() => users.id).notNull(),
-//   isVerifiedPurchase: integer('is_verified_purchase', { mode: 'boolean' }).notNull().default(false),
-//   rating: integer('rating').notNull(),
-//   title: text('title').notNull(),
-//   content: text('content').notNull(),
-//   pros: text('pros'), // JSON array
-//   cons: text('cons'), // JSON array
-//   helpfulVotes: integer('helpful_votes').notNull().default(0),
-//   createdAt: text('created_at').notNull(),
-//   updatedAt: text('updated_at').notNull(),
-//   childAge: text('child_age'),
-//   images: text('images'), // JSON array
-//   reportedCount: integer('reported_count').notNull().default(0),
-//   isHighlighted: integer('is_highlighted', { mode: 'boolean' }).notNull().default(false),
-//   isEdited: integer('is_edited', { mode: 'boolean' }).notNull().default(false),
-// });
-
-// export const partnerOffers = sqliteTable('partner_offers', {
-//   id: text('id').primaryKey(),
-//   partnerId: text('partner_id').references(() => partners.id).notNull(),
-//   title: text('title').notNull(),
-//   description: text('description').notNull(),
-//   image: text('image'),
-//   pointsCost: integer('points_cost').notNull(),
-//   originalValue: integer('original_value'),
-//   type: text('type').notNull(), // discount, product, service, giveaway, experience
-//   status: text('status').notNull(), // active, ended, coming_soon
-//   startDate: text('start_date').notNull(),
-//   endDate: text('end_date').notNull(),
-//   totalQuantity: integer('total_quantity'),
-//   remainingQuantity: integer('remaining_quantity'),
-//   redeemInstructions: text('redeem_instructions').notNull(),
-//   termsAndConditions: text('terms_and_conditions').notNull(),
-//   isSponsored: integer('is_sponsored', { mode: 'boolean' }).notNull().default(false),
-//   targetAudience: text('target_audience'), // JSON array
-//   priority: integer('priority').notNull().default(0),
-// });
-
-// export const claims = sqliteTable('claims', {
-//   id: text('id').primaryKey(),
-//   offerId: text('offer_id').references(() => partnerOffers.id).notNull(),
-//   userId: text('user_id').references(() => users.id).notNull(),
-//   pointsSpent: integer('points_spent').notNull(),
-//   claimDate: text('claim_date').notNull(),
-//   status: text('status').notNull(), // pending, approved, redeemed, expired, declined
-//   redeemCode: text('redeem_code'),
-//   redeemDate: text('redeem_date'),
-//   expiryDate: text('expiry_date'),
-//   feedbackRating: integer('feedback_rating'),
-//   feedbackComment: text('feedback_comment'),
-//   feedbackDate: text('feedback_date'),
-// });
