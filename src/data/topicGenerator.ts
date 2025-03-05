@@ -65,7 +65,7 @@ const generateTopic = (index: number): Topic => {
     'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289',
   ];
 
-  const topic: Topic = {
+  return {
     slug: faker.helpers.slugify(faker.lorem.sentence().toLowerCase()),
     title: faker.lorem.sentence(),
     author: {
@@ -97,7 +97,6 @@ const generateTopic = (index: number): Topic => {
     comments: generateComments(faker.number.int({ min: 1, max: 5 })),
     attachedLists: hasLists ? faker.helpers.arrayElements(defaultLists, faker.number.int({ min: 1, max: 2 })) : undefined,
   };
-  return topic
 };
 
 export const generateTopics = (count: number): Topic[] => {
