@@ -10,7 +10,10 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate:pg"
+    "db:migrate": "drizzle-kit migrate:pg",
+    "db:seed": "npx tsx ./src/db/seed.ts",
+    "db:reset": "npm run db:clear && npm run db:migrate && npm run db:seed",
+    "db:clear": "npx tsx ./src/db/clear.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -45,7 +48,9 @@
     "@types/react": "18.2.55",
     "@types/react-dom": "18.2.18",
     "autoprefixer": "^10.4.17",
+    "dotenv": "^16.4.7",
     "drizzle-kit": "^0.30.5",
+    "drizzle-seed": "^0.3.1",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.1.0",
     "postcss": "^8.4.33",

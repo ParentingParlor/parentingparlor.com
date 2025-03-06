@@ -1,0 +1,77 @@
+{
+  "badges": [
+    {
+      "name": "Poster",
+      "description": "Authored a post",
+      "icon": "Plus",
+      "color": "green"
+    }
+  ],
+  "tags": [
+    "Books"
+  ],
+  "users": [
+    {
+      "badges": [
+        "Poster"
+      ],
+      "displayName": "Amy Anderson",
+      "email": "a@a.com",
+      "invites": [
+        {
+          "code": "A1B2C3",
+          "email": "b@b.com"
+        }
+      ],
+      "lists": [
+        {
+          "title": "Books",
+          "description": "My favorite books",
+          "items": [
+            {
+              "title": "Pride and Prejudice",
+              "description": "A Jane Austen novel"
+            }
+          ]
+        }
+      ],
+      "loginEvents": [
+        "2025-01-01T00:00:00Z"
+      ],
+      "monthlyPoints": 0,
+      "posts": [
+        {
+          "comments": [
+            {
+              "content": "goodbye?",
+              "likeEvents": [
+                "a@a.com"
+              ],
+              "userEmail": "a@a.com"
+            }
+          ],
+          "content": "Hello world!",
+          "likeEvents": [
+            "a@a.com"
+          ],
+          "slug": "hello",
+          "tags": [
+            "Books"
+          ],
+          "title": "Hello",
+          "viewEvents": [
+            "a@a.com"
+          ]
+        }
+      ],
+      "rewards": [
+        {
+          "points": 5,
+          "description": "Premium Avatar"
+        }
+      ],
+      "totalPoints": 0,
+      "verified": true
+    }
+  ]
+}
