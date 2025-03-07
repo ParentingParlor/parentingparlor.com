@@ -18,7 +18,7 @@ async function seed() {
     for (const badgeSeed of data.badges) {
       console.log(`Seeding badge ${badgeSeed.name}...`)
       await tx
-        .insert(schema.badges)
+        .insert(schema.badge)
         .values([{
           color: badgeSeed.color,
           description: badgeSeed.description,
@@ -29,7 +29,7 @@ async function seed() {
     for (const tagSeed of data.tags) {
       console.log(`Seeding tag ${tagSeed}...`)
       await tx
-        .insert(schema.tags)
+        .insert(schema.tag)
         .values([{
           name: tagSeed,
         }])
@@ -37,7 +37,7 @@ async function seed() {
     for (const userSeed of data.users) {
       console.log(`Seeding user ${userSeed.email}...`)
       const [user] = await tx
-        .insert(schema.users)
+        .insert(schema.user)
         .values([{
           displayName: userSeed.displayName,
           email: userSeed.email,
@@ -48,7 +48,7 @@ async function seed() {
         console.log(`Seeding badge ${badgeSeed} for user ${userSeed.email}...`)
         const badge = await findBadgeByNameOrThrow({ db: tx, name: badgeSeed })
         await tx
-          .insert(schema.userBadges)
+          .insert(schema.userBadge)
           .values([{
             badgeId: badge.id,
             userId: user.id,
@@ -59,7 +59,7 @@ async function seed() {
       for (const loginSeed of userSeed.loginEvents) {
         console.log(`Seeding login for user ${userSeed.email}...`)
         await tx
-          .insert(schema.eventLogins)
+          .insert(schema.eventLogin)
           .values([{
             createdAt: loginSeed,
             points: POINTS.login,
@@ -72,7 +72,7 @@ async function seed() {
       for (const inviteSeed of userSeed.invites) {
         console.log(`Seeding invite from user ${userSeed.email} to ${inviteSeed.email}...`)
         await tx
-          .insert(schema.invites)
+          .insert(schema.invite)
           .values([{
             code: inviteSeed.code,
             email: inviteSeed.email,
@@ -83,7 +83,7 @@ async function seed() {
       for (const listSeed of userSeed.lists) {
         console.log(`Seeding list ${listSeed.title} by user ${userSeed.email}...`)
         const [list] = await tx
-          .insert(schema.lists)
+          .insert(schema.list)
           .values([{
             description: listSeed.description,
             title: listSeed.title,
@@ -94,7 +94,7 @@ async function seed() {
         for (const itemSeed of listSeed.items) {
           console.log(`Seeding listItem ${itemSeed.title} on list ${listSeed.title}...`)
           await tx
-            .insert(schema.listItems)
+            .insert(schema.listItem)
             .values([{
               listId: list.id,
               title: itemSeed.title,
@@ -107,7 +107,7 @@ async function seed() {
         console.log(`Seeding post ${postSeed.slug} by user ${user.email}...`)
 
         const [post] = await tx
-          .insert(schema.posts)
+          .insert(schema.post)
           .values([{
             content: postSeed.content,
             slug: postSeed.slug,
@@ -117,7 +117,7 @@ async function seed() {
           .returning()
 
         await tx
-          .insert(schema.eventPosts)
+          .insert(schema.eventPost)
           .values([{
             points: POINTS.post,
             postId: post.id,
@@ -129,7 +129,7 @@ async function seed() {
           console.log(`Seeding postTag ${tagSeed} on post ${postSeed.slug}...`)
           const tag = await findTagByNameOrThrow({ db: tx, name: tagSeed })
           await tx
-            .insert(schema.postTags)
+            .insert(schema.postTag)
             .values([{
               postId: post.id,
               tagId: tag.id,
@@ -140,14 +140,14 @@ async function seed() {
           console.log(`Seeding postLike from user ${likeSeed} on post ${postSeed.slug}...`)
           const user = await findUserByEmailOrThrow({ db: tx, email: likeSeed })
           const [postLike] = await tx
-            .insert(schema.postLikes)
+            .insert(schema.postLike)
             .values([{
               postId: post.id,
               userId: user.id,
             }])
             .returning()
           await tx
-            .insert(schema.eventPostLikes)
+            .insert(schema.eventPostLike)
             .values([{
               points: POINTS.postLike,
               postLikeId: postLike.id,
@@ -160,7 +160,7 @@ async function seed() {
           console.log(`Seeding postView from user ${viewSeed} on post ${postSeed.slug}...`)
           const user = await findUserByEmailOrThrow({ db: tx, email: viewSeed })
           await tx
-            .insert(schema.eventViews)
+            .insert(schema.eventView)
             .values([{
               points: POINTS.view,
               postId: post.id,
@@ -174,7 +174,7 @@ async function seed() {
           const user = await findUserByEmailOrThrow({ db: tx, email: commentSeed.userEmail })
 
           const [comment] = await tx
-            .insert(schema.comments)
+            .insert(schema.comment)
             .values([{
               content: commentSeed.content,
               postId: post.id,
@@ -183,7 +183,7 @@ async function seed() {
             .returning()
 
           await tx
-            .insert(schema.eventComments)
+            .insert(schema.eventComment)
             .values([{
               points: POINTS.comment,
               commentId: comment.id,
@@ -197,7 +197,7 @@ async function seed() {
             const user = await findUserByEmailOrThrow({ db: tx, email: likeSeed })
 
             const [commentLike] = await tx
-              .insert(schema.commentLikes)
+              .insert(schema.commentLike)
               .values([{
                 commentId: comment.id,
                 userId: user.id,
@@ -205,7 +205,7 @@ async function seed() {
               .returning()
 
             await tx
-              .insert(schema.eventCommentLikes)
+              .insert(schema.eventCommentLike)
               .values([{
                 points: POINTS.commentLike,
                 commentLikeId: commentLike.id,
@@ -219,7 +219,7 @@ async function seed() {
       for (const rewardSeed of userSeed.rewards) {
         console.log(`Seeding reward ${rewardSeed.description} for user ${userSeed.email}...`)
         await tx
-          .insert(schema.rewards)
+          .insert(schema.reward)
           .values([{
             description: rewardSeed.description,
             points: rewardSeed.points,

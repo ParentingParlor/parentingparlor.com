@@ -9,25 +9,26 @@ import {
   date,
   foreignKey,
   primaryKey,
+  timestamp,
 } from "drizzle-orm/pg-core";
 
 const base = {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: text().primaryKey(),
   createdAt: date().notNull().default('now()'),
   updatedAt: date().notNull().default('now()'),
 }
 
 const userBase = {
   ...base,
-  userId: integer()
-    .references(() => users.id, { onDelete: 'cascade' })
+  userId: text()
+    .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
 }
 
 const userPostBase = {
   ...userBase,
-  postId: integer()
-    .references(() => posts.id, { onDelete: 'cascade' })
+  postId: text()
+    .references(() => post.id, { onDelete: 'cascade' })
     .notNull(),
 }
 
@@ -46,25 +47,41 @@ const userPostPointsBase = {
   ...pointsFields
 }
 
-export const badges = pgTable('badges', {
+export const account = pgTable("account", {
+	id: text("id").primaryKey(),
+	accountId: text('account_id').notNull(),
+	providerId: text('provider_id').notNull(),
+	userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+	accessToken: text('access_token'),
+	refreshToken: text('refresh_token'),
+	idToken: text('id_token'),
+	accessTokenExpiresAt: timestamp('access_token_expires_at'),
+	refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
+	scope: text('scope'),
+	password: text('password'),
+	createdAt: timestamp('created_at').notNull(),
+	updatedAt: timestamp('updated_at').notNull()
+});
+
+export const badge = pgTable('badge', {
   ...base,
   name: text().notNull().unique(),
   description: text().notNull(),
   icon: text().notNull(),
   color: text().notNull(),
 });
-export const badgesRelations = relations(badges, (helpers) => {
-  const userBadgesRelation = helpers.many(userBadges)
+export const badgeRelations = relations(badge, (helpers) => {
+  const userBadgesRelation = helpers.many(userBadge)
   const relations = { userBadges: userBadgesRelation }
   return relations
 });
 
-export const comments = pgTable(
-  "comments",
+export const comment = pgTable(
+  "comment",
   {
     ...userPostBase,
     content: text().notNull(),
-    parentCommentId: integer(),
+    parentCommentId: text(),
   },
   (table) => [
     foreignKey({
@@ -73,126 +90,126 @@ export const comments = pgTable(
     })
   ]
 );
-export const commentsRelations = relations(comments, (helpers) => {
+export const commentRelations = relations(comment, (helpers) => {
   const relations = {
-    commentLikes: helpers.many(commentLikes),
-    eventComments: helpers.many(eventComments),
-    post: helpers.one(posts, {
-      fields: [comments.postId],
-      references: [posts.id],
+    commentLikes: helpers.many(commentLike),
+    eventComments: helpers.many(eventComment),
+    post: helpers.one(post, {
+      fields: [comment.postId],
+      references: [post.id],
     }),
-    user: helpers.one(users, {
-      fields: [comments.userId],
-      references: [users.id],
+    user: helpers.one(user, {
+      fields: [comment.userId],
+      references: [user.id],
     }),
   }
   return relations
 });
 
-export const commentLikes = pgTable('commentLikes', {
+export const commentLike = pgTable('commentLike', {
   ...userBase,
-  commentId: integer()
-    .references(() => comments.id, { onDelete: 'cascade' })
+  commentId: text()
+    .references(() => comment.id, { onDelete: 'cascade' })
     .notNull(),
 });
-export const commentLikesRelations = relations(commentLikes, (helpers) => {
+export const commentLikeRelations = relations(commentLike, (helpers) => {
   const relations = {
-    comment: helpers.one(comments, {
-      fields: [commentLikes.commentId],
-      references: [comments.id],
+    comment: helpers.one(comment, {
+      fields: [commentLike.commentId],
+      references: [comment.id],
     }),
-    eventCommentLikes: helpers.many(eventCommentLikes),
-    user: helpers.one(users, {
-      fields: [commentLikes.userId],
-      references: [users.id],
+    eventCommentLikes: helpers.many(eventCommentLike),
+    user: helpers.one(user, {
+      fields: [commentLike.userId],
+      references: [user.id],
     }),
   }
   return relations
 });
 
-export const eventComments = pgTable('eventComments', {
+export const eventComment = pgTable('eventComment', {
   ...userPointsBase,
-  commentId: integer()
-    .references(() => comments.id, { onDelete: 'cascade' })
+  commentId: text()
+    .references(() => comment.id, { onDelete: 'cascade' })
     .notNull(),
 })
-export const eventCommentsRelations = relations(eventComments, (helpers) => {
+export const eventCommentRelations = relations(eventComment, (helpers) => {
   const relations = {
-    comment: helpers.one(comments, {
-      fields: [eventComments.commentId],
-      references: [comments.id],
+    comment: helpers.one(comment, {
+      fields: [eventComment.commentId],
+      references: [comment.id],
     }),
-    user: helpers.one(users, {
-      fields: [eventComments.userId],
-      references: [users.id],
+    user: helpers.one(user, {
+      fields: [eventComment.userId],
+      references: [user.id],
     }),
   }
   return relations
 });
 
-export const eventCommentLikes = pgTable('eventCommentLikes', {
+export const eventCommentLike = pgTable('eventCommentLike', {
   ...userPointsBase,
-  commentLikeId: integer()
-    .references(() => commentLikes.id, { onDelete: 'cascade' })
+  commentLikeId: text()
+    .references(() => commentLike.id, { onDelete: 'cascade' })
     .notNull(),
 })
-export const eventCommentLikesRelations = relations(eventCommentLikes, (helpers) => {
+export const eventCommentLikeRelations = relations(eventCommentLike, (helpers) => {
   const relations = {
-    commentLike: helpers.one(commentLikes, {
-      fields: [eventCommentLikes.commentLikeId],
-      references: [commentLikes.id],
+    commentLike: helpers.one(commentLike, {
+      fields: [eventCommentLike.commentLikeId],
+      references: [commentLike.id],
     }),
-    user: helpers.one(users, {
-      fields: [eventCommentLikes.userId],
-      references: [users.id],
+    user: helpers.one(user, {
+      fields: [eventCommentLike.userId],
+      references: [user.id],
     }),
   }
   return relations
 });
 
-export const eventInvites = pgTable('eventInvites', {
+export const eventInvite = pgTable('eventInvite', {
   ...userPointsBase,
-  inviteId: integer()
-    .references(() => invites.id, { onDelete: 'cascade' })
+  inviteId: text()
+    .references(() => invite.id, { onDelete: 'cascade' })
     .notNull(),
 })
-export const eventInvitesRelations = relations(eventInvites, (helpers) => {
+export const eventInviteRelations = relations(eventInvite, (helpers) => {
   const relations = {
-    invite: helpers.one(invites, {
-      fields: [eventInvites.inviteId],
-      references: [invites.id],
+    invite: helpers.one(invite, {
+      fields: [eventInvite.inviteId],
+      references: [invite.id],
     }),
-    user: helpers.one(users, {
-      fields: [eventInvites.userId],
-      references: [users.id],
+    user: helpers.one(user, {
+      fields: [eventInvite.userId],
+      references: [user.id],
     }),
   }
   return relations
 });
 
-export const eventLogins = pgTable('eventLogins', {
+export const eventLogin = pgTable('eventLogin', {
   ...userPointsBase,
 })
-export const eventLoginsRelations = relations(eventLogins, (helpers) => {
-  const userRelation = helpers.one(users, {
-    fields: [eventLogins.userId],
-    references: [users.id],
+export const eventLoginRelations = relations(eventLogin, (helpers) => {
+  const userRelation = helpers.one(user, {
+    fields: [eventLogin.userId],
+    references: [user.id],
   })
   const relations = { user: userRelation }
   return relations
 });
 
-export const eventPosts = pgTable('eventPosts', {
+export const eventPost = pgTable('eventPost', {
   ...userPostPointsBase,
 })
-export const eventPostsRelations = relations(eventPosts, (helpers) => {
-  const postRelation = helpers.one(posts, {
-    fields: [eventPosts.postId],
-    references: [posts.id],
+export const eventPostRelations = relations(eventPost, (helpers) => {
+  const postRelation = helpers.one(post, {
+    fields: [eventPost.postId],
+    references: [post.id],
   })
-  const userRelation = helpers.one(users, {
-    fields: [eventPosts.userId],
-    references: [users.id],
+  const userRelation = helpers.one(user, {
+    fields: [eventPost.userId],
+    references: [user.id],
   })
   const relations = {
     post: postRelation,
@@ -201,20 +218,20 @@ export const eventPostsRelations = relations(eventPosts, (helpers) => {
   return relations
 });
 
-export const eventPostLikes = pgTable('eventPostLikes', {
+export const eventPostLike = pgTable('eventPostLike', {
   ...userPointsBase,
-  postLikeId: integer()
-    .references(() => postLikes.id, { onDelete: 'cascade' })
+  postLikeId: text()
+    .references(() => postLike.id, { onDelete: 'cascade' })
     .notNull(),
 })
-export const eventPostLikesRelations = relations(eventPostLikes, (helpers) => {
-  const postLikeRelation = helpers.one(postLikes, {
-    fields: [eventPostLikes.postLikeId],
-    references: [postLikes.id],
+export const eventPostLikeRelations = relations(eventPostLike, (helpers) => {
+  const postLikeRelation = helpers.one(postLike, {
+    fields: [eventPostLike.postLikeId],
+    references: [postLike.id],
   })
-  const userRelation = helpers.one(users, {
-    fields: [eventPostLikes.userId],
-    references: [users.id],
+  const userRelation = helpers.one(user, {
+    fields: [eventPostLike.userId],
+    references: [user.id],
   })
   const relations = {
     postLike: postLikeRelation,
@@ -223,17 +240,17 @@ export const eventPostLikesRelations = relations(eventPostLikes, (helpers) => {
   return relations
 })
 
-export const eventViews = pgTable('eventViews', {
+export const eventView = pgTable('eventView', {
   ...userPostPointsBase,
 })
-export const eventViewsRelations = relations(eventViews, (helpers) => {
-  const postRelation = helpers.one(posts, {
-    fields: [eventViews.postId],
-    references: [posts.id],
+export const eventViewRelations = relations(eventView, (helpers) => {
+  const postRelation = helpers.one(post, {
+    fields: [eventView.postId],
+    references: [post.id],
   })
-  const userRelation = helpers.one(users, {
-    fields: [eventViews.userId],
-    references: [users.id],
+  const userRelation = helpers.one(user, {
+    fields: [eventView.userId],
+    references: [user.id],
   })
   const relations = {
     post: postRelation,
@@ -242,43 +259,43 @@ export const eventViewsRelations = relations(eventViews, (helpers) => {
   return relations
 });
 
-export const invites = pgTable('invites', {
+export const invite = pgTable('invite', {
   ...base,
   accepted: boolean().notNull().default(false),
-  acceptorId: integer().references(() => users.id, { onDelete: 'cascade' }),
+  acceptorId: text().references(() => user.id, { onDelete: 'cascade' }),
   code: text().notNull(),
   email: text().notNull(),
-  senderId: integer()
-    .references(() => users.id, { onDelete: 'cascade' })
+  senderId: text()
+    .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
 });
-export const invitesRelations = relations(invites, (helpers) => {
+export const inviteRelations = relations(invite, (helpers) => {
   const relations = {
-    eventInvites: helpers.many(eventInvites),
-    recipient: helpers.one(users, {
-      fields: [invites.acceptorId],
-      references: [users.id],
+    eventInvites: helpers.many(eventInvite),
+    recipient: helpers.one(user, {
+      fields: [invite.acceptorId],
+      references: [user.id],
     }),
-    sender: helpers.one(users, {
-      fields: [invites.senderId],
-      references: [users.id],
+    sender: helpers.one(user, {
+      fields: [invite.senderId],
+      references: [user.id],
     }),
   }
   return relations
 });
 
-export const lists = pgTable('lists', {
+export const list = pgTable('list', {
   ...userBase,
   title: text().notNull(),
   description: text('description'),
   public: boolean().notNull().default(false),
 });
-export const listsRelations = relations(lists, (helpers) => {
-  const listItemsRelation = helpers.many(listItems)
-  const postListsRelations = helpers.many(postLists)
-  const userRelation = helpers.one(users, {
-    fields: [lists.userId],
-    references: [users.id],
+export const listRelations = relations(list, (helpers) => {
+  const listItemsRelation = helpers.many(listItem)
+  const postListsRelations = helpers.many(postList)
+  const userRelation = helpers.one(user, {
+    fields: [list.userId],
+    references: [user.id],
   })
   const relations = {
     listItems: listItemsRelation,
@@ -288,180 +305,210 @@ export const listsRelations = relations(lists, (helpers) => {
   return relations
 });
 
-export const listItems = pgTable('listItems', {
+export const listItem = pgTable('listItem', {
   ...base,
-  listId: integer()
-    .references(() => lists.id, { onDelete: 'cascade' })
+  listId: text()
+    .references(() => list.id, { onDelete: 'cascade' })
     .notNull(),
   title: text('title').notNull(),
   description: text('description').notNull(),
 });
-export const listItemsRelations = relations(listItems, (helpers) => {
-  const listRelation = helpers.one(lists, {
-    fields: [listItems.listId],
-    references: [lists.id],
+export const listItemRelations = relations(listItem, (helpers) => {
+  const listRelation = helpers.one(list, {
+    fields: [listItem.listId],
+    references: [list.id],
   })
   const relations = { list: listRelation }
   return relations
 });
 
-export const rewards = pgTable('rewards', {
+export const reward = pgTable('reward', {
   ...userBase,
   points: integer().notNull(),
   description: text().notNull(),
 });
-export const rewardsRelations = relations(rewards, (helpers) => {
-  const userRelation = helpers.one(users, {
-    fields: [rewards.userId],
-    references: [users.id],
+export const rewardRelations = relations(reward, (helpers) => {
+  const userRelation = helpers.one(user, {
+    fields: [reward.userId],
+    references: [user.id],
   })
   const relations = { user: userRelation }
   return relations
 });
 
-export const posts = pgTable('posts', {
+export const post = pgTable('post', {
   ...userBase,
   content: text().notNull(),
   slug: text('slug').notNull().unique(),
   title: text().notNull(),
 })
-export const postsRelations = relations(posts, (helpers) => {
+export const postRelations = relations(post, (helpers) => {
   const relations = {
-    comments: helpers.many(comments),
-    postLists: helpers.many(postLists),
-    user: helpers.one(users, {
-      fields: [posts.userId],
-      references: [users.id],
+    comments: helpers.many(comment),
+    postLists: helpers.many(postList),
+    user: helpers.one(user, {
+      fields: [post.userId],
+      references: [user.id],
     }),
-    eventPosts: helpers.many(eventPosts),
-    eventViews: helpers.many(eventViews),
+    eventPosts: helpers.many(eventPost),
+    eventViews: helpers.many(eventView),
   }
   return relations
 });
 
-export const postLikes = pgTable('postLikes', {
+export const postLike = pgTable('postLike', {
   ...userPostBase,
 })
-export const postLikesRelations = relations(postLikes, (helpers) => {
+export const postLikeRelations = relations(postLike, (helpers) => {
   const relations = {
-    eventPostLikes: helpers.many(eventPostLikes),
-    post: helpers.one(posts, {
-      fields: [postLikes.postId],
-      references: [posts.id],
+    eventPostLikes: helpers.many(eventPostLike),
+    post: helpers.one(post, {
+      fields: [postLike.postId],
+      references: [post.id],
     }),
-    user: helpers.one(users, {
-      fields: [postLikes.userId],
-      references: [users.id],
+    user: helpers.one(user, {
+      fields: [postLike.userId],
+      references: [user.id],
     }),
   }
   return relations
 });
 
-export const postLists = pgTable(
-  'postLists',
+export const postList = pgTable(
+  'postList',
   {
-    listId: integer()
+    listId: text()
       .notNull()
-      .references(() => lists.id),
-    postId: integer()
+      .references(() => list.id),
+    postId: text()
       .notNull()
-      .references(() => posts.id),
+      .references(() => post.id),
   },
   (t) => [
     primaryKey({ columns: [t.listId, t.postId] })
   ],
 );
-export const postListsRelations = relations(postLists, (helpers) => {
+export const postListRelations = relations(postList, (helpers) => {
   return {
-    eventPostLikes: helpers.many(eventPostLikes),
-    list: helpers.one(lists, {
-      fields: [postLists.listId],
-      references: [lists.id],
+    eventPostLikes: helpers.many(eventPostLike),
+    list: helpers.one(list, {
+      fields: [postList.listId],
+      references: [list.id],
     }),
-    post: helpers.one(posts, {
-      fields: [postLists.postId],
-      references: [posts.id],
+    post: helpers.one(post, {
+      fields: [postList.postId],
+      references: [post.id],
     })
   }
 });
 
-export const postTags = pgTable(
-  'postTags',
+export const postTag = pgTable(
+  'postTag',
   {
-    postId: integer()
+    postId: text()
       .notNull()
-      .references(() => posts.id),
-    tagId: integer()
+      .references(() => post.id),
+    tagId: text()
       .notNull()
-      .references(() => tags.id),
+      .references(() => tag.id),
   },
   (table) => [
     primaryKey({ columns: [table.postId, table.tagId] })
   ],
 );
-export const postTagsRelations = relations(postTags, (helpers) => {
+export const postTagRelations = relations(postTag, (helpers) => {
   return {
-    post: helpers.one(posts, {
-      fields: [postTags.postId],
-      references: [posts.id],
+    post: helpers.one(post, {
+      fields: [postTag.postId],
+      references: [post.id],
     }),
-    tag: helpers.one(tags, {
-      fields: [postTags.tagId],
-      references: [tags.id],
+    tag: helpers.one(tag, {
+      fields: [postTag.tagId],
+      references: [tag.id],
     }),
   }
 });
 
-export const tags = pgTable('tagsRewards', {
+export const session = pgTable("session", {
+	id: text("id").primaryKey(),
+	expiresAt: timestamp('expires_at').notNull(),
+	token: text('token').notNull().unique(),
+	createdAt: timestamp('created_at').notNull(),
+	updatedAt: timestamp('updated_at').notNull(),
+	ipAddress: text('ip_address'),
+	userAgent: text('user_agent'),
+	userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' })
+});
+
+export const tag = pgTable('tag', {
   ...base,
   name: text().notNull().unique(),
 })
-
-export const users = pgTable('users', {
-  ...base,
-  email: text().notNull().unique(),
-  displayName: text().notNull(),
-  verified: boolean().notNull().default(false),
-  points: integer().notNull().default(0),
-  monthlyPoints: integer().notNull().default(0),
-});
-export const usersRelations = relations(users, (helpers) => {
+export const tagRelations = relations(tag, (helpers) => {
   const relations = {
-    userBadges: helpers.many(userBadges),
-    comments: helpers.many(comments),
-    commentLikes: helpers.many(commentLikes),
-    eventComments: helpers.many(eventComments),
-    eventCommentLikes: helpers.many(eventCommentLikes),
-    eventInvites: helpers.many(eventInvites),
-    eventLogins: helpers.many(eventLogins),
-    eventPosts: helpers.many(eventPosts),
-    eventPostLikes: helpers.many(eventPostLikes),
-    eventViews: helpers.many(eventViews),
-    invites: helpers.many(invites),
-    lists: helpers.many(lists),
-    pointRewards: helpers.many(rewards),
-    posts: helpers.many(posts),
-    postLikes: helpers.many(postLikes),
+    postTags: helpers.many(postTag),
+  }
+  return relations
+});
+
+export const user = pgTable('user', {
+  id: text("id").primaryKey(),
+  email: text('email').notNull().unique(),
+  emailVerified: boolean('email_verified').notNull(),
+  image: text('image'),
+  monthlyPoints: integer().notNull().default(0),
+  name: text('name').notNull(),
+  points: integer().notNull().default(0),
+  verified: boolean().notNull().default(false),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull()
+});
+export const userRelations = relations(user, (helpers) => {
+  const relations = {
+    userBadges: helpers.many(userBadge),
+    comments: helpers.many(comment),
+    commentLikes: helpers.many(commentLike),
+    eventComments: helpers.many(eventComment),
+    eventCommentLikes: helpers.many(eventCommentLike),
+    eventInvites: helpers.many(eventInvite),
+    eventLogins: helpers.many(eventLogin),
+    eventPosts: helpers.many(eventPost),
+    eventPostLikes: helpers.many(eventPostLike),
+    eventViews: helpers.many(eventView),
+    invites: helpers.many(invite),
+    lists: helpers.many(list),
+    pointRewards: helpers.many(reward),
+    posts: helpers.many(post),
+    postLikes: helpers.many(postLike),
   }
   return relations;
 });
 
-export const userBadges = pgTable('userBadges', {
+export const userBadge = pgTable('userBadge', {
   ...userBase,
-  badgeId: integer()
-    .references(() => badges.id, { onDelete: 'cascade' })
+  badgeId: text()
+    .references(() => badge.id, { onDelete: 'cascade' })
     .notNull(),
 })
-export const userBadgesRelations = relations(userBadges, (helpers) => {
+export const userBadgeRelations = relations(userBadge, (helpers) => {
   const relations = {
-    badge: helpers.one(badges, {
-      fields: [userBadges.badgeId],
-      references: [badges.id],
+    badge: helpers.one(badge, {
+      fields: [userBadge.badgeId],
+      references: [badge.id],
     }),
-    user: helpers.one(users, {
-      fields: [userBadges.userId],
-      references: [users.id],
+    user: helpers.one(user, {
+      fields: [userBadge.userId],
+      references: [user.id],
     }),
   }
   return relations
+});
+
+export const verification = pgTable("verification", {
+	id: text("id").primaryKey(),
+	identifier: text('identifier').notNull(),
+	value: text('value').notNull(),
+	expiresAt: timestamp('expires_at').notNull(),
+	createdAt: timestamp('created_at'),
+	updatedAt: timestamp('updated_at')
 });
