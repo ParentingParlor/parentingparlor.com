@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from './ui/button';
 import { useUser, usePoints } from '@/context/UserContext';
+import AuthHeader from '@/feature/auth/AuthHeader';
 
 interface HeaderProps {
   showMobileMenu: boolean;
@@ -101,74 +102,7 @@ export default function Header({ showMobileMenu, sidebarOpen, onSidebarOpenChang
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/profile/points">
-              <Button variant="ghost" className="text-sm font-medium hidden sm:flex items-center gap-1">
-                <Award className="h-4 w-4 text-purple-600 mr-1" />
-                <span>{points.total.toLocaleString()} Points</span>
-              </Button>
-            </Link>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-purple-600 rounded-full text-white text-xs flex items-center justify-center">
-                    3
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <div className="p-2">
-                  <h3 className="font-semibold text-gray-900 px-2 py-1">Notifications</h3>
-                </div>
-                <DropdownMenuSeparator />
-                {notifications.map((notification) => (
-                  <DropdownMenuItem key={notification.id} className="p-3 cursor-pointer">
-                    <div>
-                      <div className="font-medium text-gray-900">{notification.title}</div>
-                      <div className="text-sm text-gray-500">{notification.description}</div>
-                      <div className="text-xs text-gray-400 mt-1">{notification.time}</div>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="p-2 text-center text-purple-600 cursor-pointer">
-                  View all notifications
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-                    <span className="text-purple-700 font-medium">
-                      {user.name[0]}
-                    </span>
-                  </div>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={() => handleNavigation('/profile')}>
-                  <UserCircle className="h-4 w-4 mr-2" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => handleNavigation('/profile/my-lists')}>
-                  <List className="h-4 w-4 mr-2" />
-                  My Lists
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => handleNavigation('/profile/points')}>
-                  <Award className="h-4 w-4 mr-2" />
-                  My Points
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => handleNavigation('/profile/settings')}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Sign out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <AuthHeader />
 
             {showMobileMenu && (
               <Button
