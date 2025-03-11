@@ -3,6 +3,7 @@ import sendEmail from "@/feature/email/sendEmail";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink } from "better-auth/plugins/magic-link";
+import { admin } from "better-auth/plugins"
 
 if (!process.env.GOOGLE_CLIENT_ID) {
   throw new Error("GOOGLE_CLIENT_ID is not set");
@@ -23,6 +24,7 @@ export const auth = betterAuth({
     },
   },
   plugins: [
+    admin(),
     magicLink({
       sendMagicLink: async ({ email, token, url }, request) => {
         console.log(`Sending magic link to ${email}...`)
