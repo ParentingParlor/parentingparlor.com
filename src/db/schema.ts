@@ -1,5 +1,7 @@
+import { Db } from "@/feature/db/dbTypes";
 import {
   relations,
+  sql,
 } from "drizzle-orm";
 import {
   integer,
@@ -13,7 +15,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 const base = {
-  id: text().primaryKey(),
+  id: text().primaryKey().default(sql`gen_random_uuid()`),
   createdAt: date().notNull().default('now()'),
   updatedAt: date().notNull().default('now()'),
 }
@@ -292,7 +294,7 @@ export const list = pgTable('list', {
 });
 export const listRelations = relations(list, (helpers) => {
   const listItemsRelation = helpers.many(listItem)
-  const postListsRelations = helpers.many(postList)
+  const postListsRelations = helpers.many(postList) 
   const userRelation = helpers.one(user, {
     fields: [list.userId],
     references: [user.id],
