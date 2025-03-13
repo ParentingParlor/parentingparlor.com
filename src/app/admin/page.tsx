@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import getRequiredAuthSession from "@/feature/auth/getRequiredAuthSession";
+import getRequiredAuthState from "@/feature/auth/getRequiredAuthSession";
 import UserTable from "@/feature/user/UserTable";
 
 export default async function AdminPage () {
-  const session = await getRequiredAuthSession()
+  const session = await getRequiredAuthState()
   if (session.user.role !== 'admin') {
     return <div>Access denied</div>
   }

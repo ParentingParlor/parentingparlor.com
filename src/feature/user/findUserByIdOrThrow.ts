@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm'
 
 export default async function findUserByIdOrThrow(props: {
   db: Db
-  id: number
+  id: string
 }) {
   const user = await findUserOrThrow({
     db: props.db,

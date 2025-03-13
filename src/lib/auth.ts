@@ -1,9 +1,12 @@
 import { db } from "@/db";
 import sendEmail from "@/feature/email/sendEmail";
-import { betterAuth } from "better-auth";
+import { betterAuth, BetterAuthOptions } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink } from "better-auth/plugins/magic-link";
-import { admin } from "better-auth/plugins"
+import { admin, customSession } from "better-auth/plugins"
+import findUserOrThrow from "@/feature/user/findUserOrThrow";
+import { eq } from "drizzle-orm";
+import findUserByIdOrThrow from "@/feature/user/findUserByIdOrThrow";
 
 if (!process.env.GOOGLE_CLIENT_ID) {
   throw new Error("GOOGLE_CLIENT_ID is not set");
@@ -13,7 +16,7 @@ if (!process.env.GOOGLE_CLIENT_SECRET) {
   throw new Error("GOOGLE_CLIENT_SECRET is not set");
 }
 
-export const auth = betterAuth({
+const options = {
   database: drizzleAdapter(db, {
     provider: "pg"
   }),
@@ -38,4 +41,20 @@ export const auth = betterAuth({
       }
     })
   ]
+} satisfies BetterAuthOptions
+
+const customSessionPlugin = customSession(async ({ user, session }) => {
+  const relatedUser = await findUserByIdOrThrow({
+    db,
+    id: user.id
+  });
+  return {
+    session,
+    user: relatedUser,
+  };
+}, options);
+
+export const auth = betterAuth({
+  ...options,
+  plugins: [customSessionPlugin],
 });

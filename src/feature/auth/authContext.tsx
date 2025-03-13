@@ -1,9 +1,11 @@
 'use client';
+
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AuthSession, AuthState, AuthUser } from './authTypes';
 import authClient from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
-import getAuthState from './getAuthSession';
+import { UpdateUserI, updateUserISchema, updateUserOSchema } from '../user/userTypes';
+import kneel from 'kneel';
 
 export type AuthContextValue = {
   impersonate: (props: {
@@ -13,6 +15,10 @@ export type AuthContextValue = {
   logoutLoading: boolean;
   session?: AuthSession
   stopImpersonating: () => Promise<void>
+  update: (props: {
+    i: UpdateUserI
+  }) => Promise<void>
+  updating: boolean
   user?: AuthUser
 }
 
@@ -23,6 +29,7 @@ export function AuthProvider(props: {
   state: AuthState | null
 }) {
   const [session, setSession] = useState(props.state?.session)
+  const [updating, setUpdating] = useState(false)
   const [user, setUser] = useState(props.state?.user)
   useEffect(() => {
     if (props.state) {
@@ -78,6 +85,20 @@ export function AuthProvider(props: {
     setUser(user)
   }, [])
 
+  const update = useCallback(async (props: {
+    i: UpdateUserI
+  }) => {
+    setUpdating(true)
+    const user = await kneel({
+      body: props.i,
+      i: updateUserISchema,
+      o: updateUserOSchema,
+      url: '/api/user/update'
+    })
+    setUser(user)
+    setUpdating(false)
+  }, [])
+
   const value = useMemo(() => {
     const value: AuthContextValue = {
       impersonate,
@@ -85,10 +106,12 @@ export function AuthProvider(props: {
       logoutLoading,
       session,
       stopImpersonating,
+      update,
+      updating,
       user
     }
     return value
-  }, [impersonate, logout, logoutLoading, session, stopImpersonating, user])
+  }, [impersonate, logout, logoutLoading, session, stopImpersonating, update, updating, user])
 
   return (
     <AuthContext.Provider value={value}>

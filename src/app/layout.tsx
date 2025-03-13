@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import RootLayoutClient from "@/components/RootLayoutClient";
 import { UserProvider } from "@/context/UserContext";
-import getAuthState from "@/feature/auth/getAuthSession";
+import getAuthState from "@/feature/auth/getAuthState";
 import { AuthProvider } from "@/feature/auth/authContext";
 
 const inter = Inter({ subsets: ["latin"] });

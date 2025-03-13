@@ -456,6 +456,7 @@ export const tagRelations = relations(tag, (helpers) => {
 
 export const user = pgTable('user', {
   id: text("id").primaryKey(),
+  displayName: text('display_name'),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').notNull(),

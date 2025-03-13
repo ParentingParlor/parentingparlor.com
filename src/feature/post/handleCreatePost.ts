@@ -1,16 +1,16 @@
 import { post } from "@/db/schema";
 import { Db } from "../db/dbTypes";
 import { CreatePostI, CreatePostO } from "./postTypes"
-import getRequiredAuthSession from "../auth/getRequiredAuthSession";
+import getRequiredAuthState from "../auth/getRequiredAuthState";
 
 export default async function handleCreatePost (props: {
   i: CreatePostI,
   db: Db
 }): Promise<CreatePostO> {
-  const session = await getRequiredAuthSession()
+  const authState = await getRequiredAuthState()
   const values = {
     ...props.i,
-    userId: session.user.id
+    userId: authState.user.id
   }
   const [created] = await props.db.insert(post).values(values).returning()
 

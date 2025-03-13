@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   return handleApi({
     handle: handleCreatePost,
     i: createPostISchema,
-    label: "/post/delete",
+    label: "/post/create",
     o: createPostOSchema,
     request,
   });

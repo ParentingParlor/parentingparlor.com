@@ -1,8 +1,6 @@
 import { Db } from '../db/dbTypes';
-import * as dbSchema from '../../db/schema';
-import { eq, SQL } from 'drizzle-orm';
-
-type UserColumns = typeof dbSchema.user._.columns;
+import { SQL } from 'drizzle-orm';
+import { UserColumns } from './userTypes';
 
 export default async function findUserOrThrow(props: {
   db: Db

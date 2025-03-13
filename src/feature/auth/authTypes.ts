@@ -1,5 +1,5 @@
 import { useAuthContext } from "./authContext";
-import getAuthState from "./getAuthSession";
+import getAuthState from "./getAuthState";
 
 type Auth = ReturnType<typeof useAuthContext>;
 export type AuthState = NonNullable<Awaited<ReturnType<typeof getAuthState>>>
