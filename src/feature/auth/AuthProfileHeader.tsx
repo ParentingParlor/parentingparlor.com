@@ -91,7 +91,7 @@ export default function AuthProfileHeader() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Avatar>
-            <AvatarImage src={auth.user.image ?? undefined} />
+            <AvatarImage src={auth.user.image ?? undefined} referrerPolicy="no-referrer"/>
             <AvatarFallback>{auth.user.email[0].toUpperCase()}</AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>
