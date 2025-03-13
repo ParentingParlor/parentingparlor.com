@@ -7,7 +7,7 @@ export default function AuthHeader() {
   if (auth.logoutLoading) {
     return <>Logging out...</>
   }
-  if (auth.session) {
+  if (auth.user) {
     return <AuthProfileHeader />
   }
   return <AuthLoginHeader />

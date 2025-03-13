@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import useRequiredAuth from "./useRequiredAuth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import authClient from "@/lib/auth-client";
 
 const notifications = [
   {
@@ -30,6 +31,26 @@ const notifications = [
 export default function AuthProfileHeader() {
   const auth = useRequiredAuth()
   const router = useRouter();
+  function handleProfileSelect() {
+    router.push('/profile')
+  }
+  function handleMyListsSelect() {
+    router.push('/profile/my-lists')
+  }
+  function handleMyPointsSelect() {
+    router.push('/profile/points')
+  }
+  function handleSettingsSelect() {
+    router.push('/profile/settings')
+  }
+  async function handleLogoutSelect() {
+    await auth.logout()
+  }
+  async function handleStopImpersonatingSelect() {
+    console.log('Stopping impersonation...')
+    await authClient.admin.stopImpersonating();
+    console.log('Impersonation stopped')
+  }
   return (
     <>
       <Link href="/profile/points">
@@ -72,32 +93,34 @@ export default function AuthProfileHeader() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Avatar>
-            <AvatarImage src={auth.session.user.image ?? undefined} />
-            <AvatarFallback>{auth.session.user.email[0].toUpperCase()}</AvatarFallback>
+            <AvatarImage src={auth.user.image ?? undefined} />
+            <AvatarFallback>{auth.user.email[0].toUpperCase()}</AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={() => router.push('/profile')}>
+          <DropdownMenuItem onSelect={handleProfileSelect}>
             <UserCircle className="h-4 w-4 mr-2" />
             Profile
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => router.push('/profile/my-lists')}>
+          <DropdownMenuItem onSelect={handleMyListsSelect}>
             <List className="h-4 w-4 mr-2" />
             My Lists
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => router.push('/profile/points')}>
+          <DropdownMenuItem onSelect={handleMyPointsSelect}>
             <Award className="h-4 w-4 mr-2" />
             My Points
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => router.push('/profile/settings')}>
+          <DropdownMenuItem onSelect={handleSettingsSelect}>
             <Settings className="h-4 w-4 mr-2" />
             Settings
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => {
-            console.log('select logout')
-            auth.logout()
-          }}>Logout</DropdownMenuItem>
+          <DropdownMenuItem onSelect={handleLogoutSelect}>Logout</DropdownMenuItem>
+          {auth.session.impersonatedBy && (
+            <DropdownMenuItem onSelect={handleStopImpersonatingSelect}>
+              Stop Impersonating
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </>

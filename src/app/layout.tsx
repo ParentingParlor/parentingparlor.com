@@ -9,7 +9,7 @@ import { AuthProvider } from "@/feature/auth/authContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "parentingparlor - Expert Parenting Advice & Community",
+  title: "A Community for Prents to Share and Learn - Parenting Parlor",
   description: "A community-driven platform for expert parenting advice and support",
 };
 
@@ -19,10 +19,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getAuthSession();
+  console.log('session', session)
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider session={session}>
+        <AuthProvider state={session}>
           <UserProvider>
             <RootLayoutClient>{children}</RootLayoutClient>
           </UserProvider>

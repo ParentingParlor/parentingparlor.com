@@ -1,22 +1,23 @@
 'use client';
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
-import { CustomSession } from './authTypes';
+import { AuthState } from './authTypes';
 import authClient from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 
 export type AuthContextValue = {
   logout: () => Promise<void>;
   logoutLoading: boolean;
-  session: CustomSession | null;
+  session?: AuthState['session']
+  user?: AuthState['user']
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider(props: {
   children: ReactNode;
-  session: CustomSession | null
+  state: AuthState | null
 }) {
-  const [session, setSession] = useState(props.session)
+  const [state, setState] = useState(props.state)
   const [logoutLoading, setLogoutLoading] = useState(false)
   const router = useRouter()
 
@@ -27,7 +28,7 @@ export function AuthProvider(props: {
       fetchOptions: {
         onSuccess: () => {
           router.refresh()
-          setSession(null)
+          setState(null)
         }
       }
     });
@@ -35,12 +36,13 @@ export function AuthProvider(props: {
   }, [router])
 
   const value = useMemo(() => {
-    return {
+    const value: AuthContextValue = {
+      ...state,
       logout,
       logoutLoading,
-      session,
     }
-  }, [logout, logoutLoading, session])
+    return value
+  }, [logout, logoutLoading, state])
 
   return (
     <AuthContext.Provider value={value}>
