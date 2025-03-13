@@ -7,37 +7,39 @@ import { useState } from "react"
 import { useUserContext } from "./userContext";
 import CustomButton from "../custom/CustomButton";
 import authClient from "@/lib/auth-client";
+import { useAuthContext } from "../auth/authContext";
 
 export default function UserMenu() {
+  const auth = useAuthContext()
   const user = useUserContext()
-  const [impersonateOpened, setImpersonateOpened] = useState(false);
-  function handleOpenImpersonate() {
-    setImpersonateOpened(true);
+  const [banOpened, setBanOpened] = useState(false);
+  function handleBan () {
+    console.log('Ban WIP')
   }
-  function handleImpersonateOpenedChange(props: {
+  function handleOpenBan() {
+    setBanOpened(true);
+  }
+  function handleBanOpenedChange(props: {
     opened: boolean
   }) {
-    setImpersonateOpened(props.opened);
+    setBanOpened(props.opened);
   }
   async function handleImpersonate () {
-    console.log('Impersonating...')
-    const impersonatedSession = await authClient.admin.impersonateUser({
-      userId: user.row.id,
-    });
-    console.log('Impersonated!', impersonatedSession)
+    await auth.impersonate({ userId: user.row.id })
   }
-  const title = <>Impersonate {user.row.email}</>
+  const banTitle = <>Ban {user.row.email}</>
   return (
     <>
       <CustomMenu>
-        <DropdownMenuItem onClick={handleOpenImpersonate}>Impersonate</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleImpersonate}>Impersonate</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleOpenBan}>Ban</DropdownMenuItem>
       </CustomMenu>
       <ModalView
-        onOpenedChange={handleImpersonateOpenedChange}
-        opened={impersonateOpened}
-        title={title}
+        onOpenedChange={handleBanOpenedChange}
+        opened={banOpened}
+        title={banTitle}
       >
-        <CustomButton onClick={handleImpersonate}>Impersonate</CustomButton>
+        <CustomButton onClick={handleBan}>Ban (WIP)</CustomButton>
       </ModalView>
     </>
   );

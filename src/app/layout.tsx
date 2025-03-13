@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import RootLayoutClient from "@/components/RootLayoutClient";
 import { UserProvider } from "@/context/UserContext";
-import getAuthSession from "@/feature/auth/getAuthSession";
+import getAuthState from "@/feature/auth/getAuthSession";
 import { AuthProvider } from "@/feature/auth/authContext";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -18,7 +18,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getAuthSession();
+  const session = await getAuthState();
   console.log('session', session)
   return (
     <html lang="en">

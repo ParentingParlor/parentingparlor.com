@@ -1,11 +1,12 @@
 import { useAuthContext } from "./authContext";
-import getAuthSession from "./getAuthSession";
+import getAuthState from "./getAuthSession";
 
 type Auth = ReturnType<typeof useAuthContext>;
-
-export type AuthState = NonNullable<Awaited<ReturnType<typeof getAuthSession>>>
+export type AuthState = NonNullable<Awaited<ReturnType<typeof getAuthState>>>
+export type AuthSession = AuthState['session'];
+export type AuthUser = AuthState['user'];
 
 export interface RequiredAuth extends Auth {
-  session: AuthState['session']
-  user: AuthState['user']
+  session: AuthSession
+  user: AuthUser
 }

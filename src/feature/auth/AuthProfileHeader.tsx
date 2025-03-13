@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import { Award, Bell, List, Settings, UserCircle } from "lucide-react";
 import Link from "next/link";
@@ -5,7 +7,8 @@ import { useRouter } from "next/navigation";
 import useRequiredAuth from "./useRequiredAuth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import authClient from "@/lib/auth-client";
+import AuthAdminItems from "./AuthAdminItems";
+import AuthImpersonateItems from "./AuthImpersonationItems";
 
 const notifications = [
   {
@@ -45,11 +48,6 @@ export default function AuthProfileHeader() {
   }
   async function handleLogoutSelect() {
     await auth.logout()
-  }
-  async function handleStopImpersonatingSelect() {
-    console.log('Stopping impersonation...')
-    await authClient.admin.stopImpersonating();
-    console.log('Impersonation stopped')
   }
   return (
     <>
@@ -116,11 +114,8 @@ export default function AuthProfileHeader() {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={handleLogoutSelect}>Logout</DropdownMenuItem>
-          {auth.session.impersonatedBy && (
-            <DropdownMenuItem onSelect={handleStopImpersonatingSelect}>
-              Stop Impersonating
-            </DropdownMenuItem>
-          )}
+          <AuthAdminItems />
+          <AuthImpersonateItems />
         </DropdownMenuContent>
       </DropdownMenu>
     </>
