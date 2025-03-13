@@ -1,7 +1,7 @@
 import { db } from "@/db";
-import getRequiredAuthState from "@/feature/auth/getRequiredAuthSession";
+import getRequiredAuthState from "@/feature/auth/getRequiredAuthState";
 import UserTable from "@/feature/user/UserTable";
-
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default async function AdminPage () {
   const session = await getRequiredAuthState()
   if (session.user.role !== 'admin') {
@@ -9,9 +9,13 @@ export default async function AdminPage () {
   }
   const users = await db.query.user.findMany()
   return (
-    <>
-      <div>Admin page</div>
-      <UserTable rows={users} />
-    </>
+    <Card>
+      <CardHeader>
+        <CardTitle>Admin page</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <UserTable rows={users} />
+      </CardContent>
+    </Card>
   )
 }
