@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from "@/components/ui/button";
-import { Award, Bell, List, Settings, UserCircle } from "lucide-react";
+import { Award, Bell, List, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useRequiredAuth from "./useRequiredAuth";
@@ -54,7 +54,7 @@ export default function AuthProfileHeader() {
       <Link href="/profile/points">
         <Button variant="ghost" className="text-sm font-medium hidden sm:flex items-center gap-1">
           <Award className="h-4 w-4 text-purple-600 mr-1" />
-          <span>??? Points</span>
+          <span>X Points</span>
         </Button>
       </Link>
 
@@ -97,7 +97,7 @@ export default function AuthProfileHeader() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onSelect={handleProfileSelect}>
-            <UserCircle className="h-4 w-4 mr-2" />
+            <User className="h-4 w-4 mr-2" />
             Profile
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={handleMyListsSelect}>
@@ -113,9 +113,11 @@ export default function AuthProfileHeader() {
             Settings
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={handleLogoutSelect}>Logout</DropdownMenuItem>
           <AuthAdminItems />
-          <AuthImpersonateItems />
+          <AuthImpersonateItems />  
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={handleLogoutSelect}>Logout</DropdownMenuItem>
+       
         </DropdownMenuContent>
       </DropdownMenu>
     </>
