@@ -6,6 +6,8 @@ import Badge from "@/feature/badge/Badge"
 import getUserLabel from "@/feature/user/getUserLabel"
 import { MapPin, User } from "lucide-react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import Breadcrumb from "@/components/Breadcrumb"
+import CustomAvatar from "@/feature/custom/CustomAvatar"
 
 export default function ProfilePage() {
   const auth = useRequiredAuth()
@@ -13,20 +15,14 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <div>{label} Profile</div>
-
+      <Breadcrumb
+        items={[
+          { label: 'Profile' }
+        ]}
+      />
       <div className="bg-white rounded-lg shadow-sm border p-6">
         <div className="flex items-center gap-6">
-          <Avatar className="h-20 w-20 border-2 border-gray-200">
-            {auth.user.image ? <AvatarImage src={auth.user.image} alt={label} referrerPolicy="no-referrer" /> : null}
-            <AvatarFallback className="bg-gray-100">
-              {label?.[0] ? (
-                <span className="text-3xl font-semibold text-purple-700">{label[0]}</span>
-              ) : (
-                <User className="h-10 w-10 text-gray-400" />
-              )}
-            </AvatarFallback>
-          </Avatar>
+          <CustomAvatar image={auth.user.image} label={label} />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{label}</h1>
             <div className="flex items-center gap-2 text-gray-500 mt-1">
@@ -34,9 +30,6 @@ export default function ProfilePage() {
               <span>
                 {auth.user.city}, {auth.user.state}
               </span>
-            </div>
-            <div className="flex gap-2 mt-3">
-              <Badge />
             </div>
           </div>
         </div>

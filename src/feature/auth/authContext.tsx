@@ -6,6 +6,7 @@ import authClient from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { UpdateUserI, updateUserISchema, updateUserOSchema } from '../user/userTypes';
 import kneel from 'kneel';
+import kneelReadUser from '../user/kneelReadUser';
 
 export type AuthContextValue = {
   impersonate: (props: {
@@ -47,13 +48,14 @@ export function AuthProvider(props: {
     const impersonation = await authClient.admin.impersonateUser({
       userId: props.userId,
     });
+    const user = await kneelReadUser({ i: { userId: props.userId } })
     if (!impersonation.data) {
       throw new Error('Impersonation failed')
     }
     setSession(impersonation.data.session)
     const impersonatedUser = {
+      ...user,
       ...impersonation.data.user,
-      banned: false
     }
     setUser(impersonatedUser)
   }, [])
@@ -74,16 +76,17 @@ export function AuthProvider(props: {
 
   const stopImpersonating = useCallback(async () => {
     console.log('Stopping impersonation...')
-    const authState =  await authClient.admin.stopImpersonating();
-    if (!authState.data) {
+    const unimpersonation =  await authClient.admin.stopImpersonating();
+    if (!unimpersonation.data) {
       throw new Error('Failed to stop impersonation')
     }
-    setSession(authState.data.session)
-    const user = {
-      ...authState.data.user,
-      banned: false
+    setSession(unimpersonation.data.session)
+    const user = await kneelReadUser({ i: { userId: unimpersonation.data.user.id } })
+    const unimpersonatedUser = {
+      ...user,
+      ...unimpersonation.data.user,
     }
-    setUser(user)
+    setUser(unimpersonatedUser)
   }, [])
 
   const update = useCallback(async (props: {

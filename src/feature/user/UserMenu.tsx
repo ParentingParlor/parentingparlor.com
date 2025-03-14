@@ -6,7 +6,6 @@ import ModalView from "@/feature/modal/ModalView";
 import { useState } from "react"
 import { useUserContext } from "./userContext";
 import CustomButton from "../custom/CustomButton";
-import authClient from "@/lib/auth-client";
 import { useAuthContext } from "../auth/authContext";
 
 export default function UserMenu() {
