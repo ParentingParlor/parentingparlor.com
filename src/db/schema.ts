@@ -16,8 +16,8 @@ import {
 
 const base = {
   id: text().primaryKey().default(sql`gen_random_uuid()`),
-  createdAt: date().notNull().default('now()'),
-  updatedAt: date().notNull().default('now()'),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp().notNull().defaultNow(),
 }
 
 const userBase = {
@@ -347,6 +347,7 @@ export const post = pgTable('post', {
 export const postRelations = relations(post, (helpers) => {
   const relations = {
     comments: helpers.many(comment),
+    postLikes: helpers.many(postLike),
     postLists: helpers.many(postList),
     user: helpers.one(user, {
       fields: [post.userId],
@@ -475,7 +476,6 @@ export const user = pgTable('user', {
 });
 export const userRelations = relations(user, (helpers) => {
   const relations = {
-    userBadges: helpers.many(userBadge),
     comments: helpers.many(comment),
     commentLikes: helpers.many(commentLike),
     eventComments: helpers.many(eventComment),
@@ -490,6 +490,7 @@ export const userRelations = relations(user, (helpers) => {
     pointRewards: helpers.many(reward),
     posts: helpers.many(post),
     postLikes: helpers.many(postLike),
+    userBadges: helpers.many(userBadge),
   }
   return relations;
 });

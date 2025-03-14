@@ -21,12 +21,17 @@ export default function CreatePostForm () {
 
   async function handleSubmit (event: FormEvent) {
     event.preventDefault()
+    const body = {
+      content,
+      slug: title,
+      title
+    }
+    console.log('body', body)
+    const parsed = createPostISchema.parse(body)
+    console.log('parsed', parsed)
     await kneel({
-      body: {
-        content,
-        slug: title,
-        title
-      },
+      body: parsed,
+      debug: true,
       i: createPostISchema,
       o: createPostOSchema,
       url: '/api/post/create',
