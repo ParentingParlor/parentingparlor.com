@@ -11,7 +11,7 @@
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "npx tsx ./src/db/migrate.ts",
-    "db:migrate:prod": "NODE_ENV=production npx tsx ./src/db/migrate.ts",
+    "db:migrate:prod": "NODE_ENV=production DATABASE_URL=$DATABASE_URL npx tsx ./src/db/migrate.ts",
     "db:seed": "npx tsx ./src/db/seed.ts",
     "db:reset": "npm run db:clear && npm run db:migrate && npm run db:seed",
     "db:clear": "npx tsx ./src/db/clear.ts"
