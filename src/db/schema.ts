@@ -448,7 +448,7 @@ export const session = pgTable("session", {
 
 export const tag = pgTable('tag', {
   ...base,
-  color: text().notNull(),
+  color: text().notNull().default('#000000'),
   name: text().notNull().unique(),
 })
 
