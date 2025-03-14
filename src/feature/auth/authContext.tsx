@@ -43,6 +43,7 @@ export function AuthProvider(props: {
   const impersonate = useCallback(async (props: {
     userId: string
   }) => {
+    console.log('impersonating...')
     const impersonation = await authClient.admin.impersonateUser({
       userId: props.userId,
     });

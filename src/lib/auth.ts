@@ -26,21 +26,6 @@ const options = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     },
   },
-  plugins: [
-    admin(),
-    magicLink({
-      sendMagicLink: async ({ email, token, url }, request) => {
-        console.log(`Sending magic link to ${email}...`)
-        await sendEmail({
-          htmlBody: `<a href="${url}">Click here to sign in</a>`,
-          subject: "Parenting Parlor",
-          to: email,
-          textBody: `Click here to sign in: ${url}?token=${token}`
-        });
-        console.log('Magic link sent!')
-      }
-    })
-  ]
 } satisfies BetterAuthOptions
 
 const customSessionPlugin = customSession(async ({ user, session }) => {
@@ -56,5 +41,20 @@ const customSessionPlugin = customSession(async ({ user, session }) => {
 
 export const auth = betterAuth({
   ...options,
-  plugins: [customSessionPlugin],
+  plugins: [
+    customSessionPlugin,
+    admin(),
+    magicLink({
+      sendMagicLink: async ({ email, token, url }, request) => {
+        console.log(`Sending magic link to ${email}...`)
+        await sendEmail({
+          htmlBody: `<a href="${url}">Click here to sign in</a>`,
+          subject: "Parenting Parlor",
+          to: email,
+          textBody: `Click here to sign in: ${url}?token=${token}`
+        });
+        console.log('Magic link sent!')
+      }
+    })
+  ],
 });
