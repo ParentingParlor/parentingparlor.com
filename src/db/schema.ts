@@ -349,6 +349,7 @@ export const postRelations = relations(post, (helpers) => {
     comments: helpers.many(comment),
     postLikes: helpers.many(postLike),
     postLists: helpers.many(postList),
+    postTags: helpers.many(postTag),
     user: helpers.one(user, {
       fields: [post.userId],
       references: [user.id],
@@ -448,6 +449,7 @@ export const tag = pgTable('tag', {
   ...base,
   name: text().notNull().unique(),
 })
+
 export const tagRelations = relations(tag, (helpers) => {
   const relations = {
     postTags: helpers.many(postTag),

@@ -20,6 +20,11 @@ const options = {
   database: drizzleAdapter(db, {
     provider: "pg"
   }),
+  trustedOrigins: [
+    'https://localhost:3000',
+    'https://parentingparlor.com/api/auth',
+    'https://parentingparlor.com',
+  ],
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID,

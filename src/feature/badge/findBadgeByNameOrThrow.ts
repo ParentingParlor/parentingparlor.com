@@ -4,7 +4,7 @@ export default async function findBadgeByNameOrThrow(props: {
   db: Db
   name: string
 }) {
-  const badge = await props.db.query.badges.findFirst({
+  const badge = await props.db.query.badge.findFirst({
     where: (columns, query) => query.eq(columns.name, props.name),
   })
   if (badge == null) {

@@ -10,24 +10,17 @@ import {
 } from "@/components/ui/tooltip";
 import { usePostContext } from './postContext';
 import getUserLabel from '../user/getUserLabel';
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', { 
-    month: 'short', 
-    day: 'numeric',
-    year: 'numeric'
-  }).format(date);
-}
+import formatDate from '../date/formatDate';
 
 export default function PostCard() {
   const post = usePostContext()
+  const date = formatDate({ date: post.row.createdAt });
   const userLabel = getUserLabel({ user: post.row.user });
 
   return (
     <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow w-full">
       <div className="mb-4">
-        <Link href={`/post/${post.row.slug}`} className="block">
+        <Link href={`/post/detail/${post.row.slug}`} className="block">
           <h2 className="text-xl font-semibold text-gray-900 hover:text-purple-600">
             {post.row.title}
           </h2>
@@ -68,7 +61,7 @@ export default function PostCard() {
               {post.row.user.city} {post.row.user.state}
             </span>
           )}
-          <span className="text-gray-400">{formatDate(post.row.createdAt)}</span>
+          <span className="text-gray-400">{date}</span>
         </div>
         
         <div className="flex items-center gap-4">

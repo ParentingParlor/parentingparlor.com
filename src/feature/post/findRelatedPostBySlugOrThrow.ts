@@ -1,7 +1,7 @@
 import { Db } from "../db/dbTypes"
 import { RelatedPost } from "./postTypes"
 
-export default async function findPostBySlugOrThrow(props: {
+export default async function findRelatedPostBySlugOrThrow(props: {
   db: Db
   slug: string
 }): Promise<RelatedPost> {
@@ -11,6 +11,11 @@ export default async function findPostBySlugOrThrow(props: {
       comments: true,
       postLikes: true,
       postLists: true,
+      postTags: {
+        with: {
+          tag: true,
+        }
+      },
       user: true,
     }
   })

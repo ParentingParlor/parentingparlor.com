@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { comment, post, postLike, postList, user } from '@/db/schema';
+import { comment, post, postLike, postList, postTag, tag, user } from '@/db/schema';
 import { InferSelectModel } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -8,10 +8,13 @@ export type Post = typeof post.$inferSelect;
 export type PostColumns = typeof post._.columns;
 
 export type RelatedPost = InferSelectModel<typeof post> & {
-  comments: InferSelectModel<typeof comment>[];
-  postLikes: InferSelectModel<typeof postLike>[];
-  postLists: InferSelectModel<typeof postList>[];
-  user: InferSelectModel<typeof user>;
+  comments: InferSelectModel<typeof comment>[]
+  postLikes: InferSelectModel<typeof postLike>[]
+  postLists: InferSelectModel<typeof postList>[]
+  postTags: (InferSelectModel<typeof postTag> & {
+    tag: InferSelectModel<typeof tag>
+  })[]
+  user: InferSelectModel<typeof user>
 };
 
 const postInsertSchema = createInsertSchema(post);

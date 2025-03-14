@@ -5,14 +5,14 @@ import { eq } from "drizzle-orm"
 
 export async function incrementPoints(props: {
   db: Db
-  userId: number,
+  userId: string
   points: number
 }) {
   await props.db
-    .update(schema.users)
+    .update(schema.user)
     .set({
-      points: dbIncrement({ column: schema.users.points, value: props.points }),
-      monthlyPoints: dbIncrement({ column: schema.users.monthlyPoints, value: props.points }),
+      points: dbIncrement({ column: schema.user.points, value: props.points }),
+      monthlyPoints: dbIncrement({ column: schema.user.monthlyPoints, value: props.points }),
     })
-    .where(eq(schema.users.id, props.userId))
+    .where(eq(schema.user.id, props.userId))
 }
