@@ -9,6 +9,7 @@ import kneel from 'kneel';
 import kneelReadUser from '../user/kneelReadUser';
 
 export type AuthContextValue = {
+  admin: boolean
   impersonate: (props: {
     userId: string
   }) => Promise<void>;
@@ -104,7 +105,9 @@ export function AuthProvider(props: {
   }, [])
 
   const value = useMemo(() => {
+    const admin = user?.role === 'admin'
     const value: AuthContextValue = {
+      admin,
       impersonate,
       logout,
       logoutLoading,

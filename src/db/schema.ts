@@ -324,23 +324,10 @@ export const listItemRelations = relations(listItem, (helpers) => {
   return relations
 });
 
-export const reward = pgTable('reward', {
-  ...userBase,
-  points: integer().notNull(),
-  description: text().notNull(),
-});
-export const rewardRelations = relations(reward, (helpers) => {
-  const userRelation = helpers.one(user, {
-    fields: [reward.userId],
-    references: [user.id],
-  })
-  const relations = { user: userRelation }
-  return relations
-});
-
 export const post = pgTable('post', {
   ...userBase,
   content: text().notNull(),
+  publishedAt: timestamp().notNull().defaultNow(),
   slug: text('slug').notNull().unique(),
   title: text().notNull(),
 })
@@ -433,6 +420,20 @@ export const postTagRelations = relations(postTag, (helpers) => {
   }
 });
 
+export const reward = pgTable('reward', {
+  ...userBase,
+  description: text().notNull(),
+  points: integer().notNull(),
+});
+export const rewardRelations = relations(reward, (helpers) => {
+  const userRelation = helpers.one(user, {
+    fields: [reward.userId],
+    references: [user.id],
+  })
+  const relations = { user: userRelation }
+  return relations
+});
+
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
   expiresAt: timestamp('expires_at').notNull(),
@@ -447,6 +448,7 @@ export const session = pgTable("session", {
 
 export const tag = pgTable('tag', {
   ...base,
+  color: text().notNull(),
   name: text().notNull().unique(),
 })
 
